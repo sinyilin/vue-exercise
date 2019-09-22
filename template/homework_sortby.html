@@ -119,16 +119,19 @@
     <thead>
       <tr>
         <th>品名</th>
-        <th class="click">價格 
+        <th class="click" @click="listening('price')">價格 
           <!-- isReverse 為反轉 className -->
-          <span class="icon isReverse">
+          <span class="icon isReverse"  :class="{inverse : isReverse}" v-if="sortValue == 'price'">
             <i class=" fas fa-angle-up text-success"></i>
           </span>
         </th>
-        <th class="click">到期日 
+        <th class="click" @click="listening('expiryDate')">到期日
+          <span class="icon isReverse" :class="{inverse : isReverse}" v-if="sortValue == 'expiryDate'">
+            <i class=" fas fa-angle-up text-success"></i>
+          </span>
         </th>
       </tr>
-      <tr v-for="item in data">
+      <tr v-for="item in sortData">
         <td>{{ item.name }}</td>
         <td>{{ item.price }}</td>
         <td>{{ item.expiryDate }}</td>
@@ -178,11 +181,48 @@ var app = new Vue({
         name: '金殺 巧粒粒',
         price: 120,
         expiryDate: 200
-      }
+      },
+      
     ],
+    isReverse:'',
+    sortValue:''
   },
   // 請在此撰寫 JavaScript
-  computed: {}
+  computed: {
+    sortData(){
+      var data = this.data;
+      var isReverse = this.isReverse;
+      
+      switch (this.sortValue) {
+        case 'price':
+          return data.sort(function (a, b) {
+              return ( isReverse ? b.price - a.price : a.price - b.price);
+          });
+          break;
+        case 'expiryDate':
+          return data.sort(function (a, b) {
+            return ( isReverse ? b.expiryDate - a.expiryDate : a.expiryDate - b.expiryDate);
+          });
+          break;
+          
+        default:
+          return data;
+          break;
+      }
+    }
+  },
+  methods:{
+    listening (sortValue) {
+      this.isReverse = (sortValue == this.sortValue ? !this.isReverse : true);
+      if(''){
+        console.log("1");
+      }else{
+        console.log("2");
+      }
+      // this.isReverse = !this.isReverse;
+      this.sortValue = sortValue;      
+    }
+  }
 });
 </script>
 
