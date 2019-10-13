@@ -123,7 +123,9 @@
 <div id="app">
   <h2>透過 emit 向外傳遞資訊</h2>
   我透過元件儲值了 {{ cash }} 元
-  <button-counter></button-counter>
+  <button class="btn btn-primary" @click="incrementTotal">按我+1</button>
+  <!-- 這個事件可以自定義 這邊定義成increment-->
+  <button-counter @increment="incrementTotal"></button-counter>
   <hr>
   <button-counter></button-counter>
 </div>
@@ -140,7 +142,11 @@ Vue.component('buttonCounter', {
     }
   },
   methods: {
-    
+    incrementCounter(){
+      //此處的第一個參數是外部事件的名稱 
+      // this.$emit('increment');
+      this.$emit('increment',Number(this.counter));
+    }
   }
 });
 
@@ -150,7 +156,10 @@ var app = new Vue({
     cash: 300
   },
   methods: {
-    
+    incrementTotal(val){
+      // this.cash++;
+      this.cash = this.cash + val;
+    }
   }
 });
 </script>
