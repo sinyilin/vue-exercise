@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css">
+  <title>Vue - Component System</title>
+  <style type="text/css">
+    body {
+      font-size: 1.8em;
+    }
+
+    #app {
+      display: block;
+      width: 1000px;
+      height: 500px;
+      overflow: hidden;
+    }
+
+    .header {
+      width: 100%;
+      height: 80px;
+      line-height: 80px;
+      text-align: center;
+      background-color: #eee;
+    }
+
+    .main {
+      position: relative;
+      width: 60%;
+      height: 100%;
+      text-align: center;
+      background-color: #fff;
+      float: left;
+    }
+
+    .aside {
+      width: 40%;
+      height: 100%;
+      line-height: 300px;
+      text-align: center;
+      background-color: pink;
+      float: right;
+    }
+
+    .block {
+      display: inline-block;
+      width: 85px;
+      height: 85px;
+      background-color: green;
+      margin: 20px;
+      color: #fff;
+      font-size: 26px;
+      line-height: 85px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+    <h2>不具名插槽</h2>
+    <h3>以外部資料取代slot</h3>
+    <single-slot-component>
+        <p>使用這段取代原本的 Slot。</p>
+    </single-slot-component>
+  
+    <h2>具名插槽</h2>
+    <named-slot-component>
+      <!-- 请注意， v-slot 只能添加到 <template> 或自定义组件上，这点与弃用的 slot 属性不同   这里使用了缩写#  v-slot的缩写是# -->
+      <!-- v-slot can only be used on components or <template> -->
+      <!-- <header v-slot:header>替換的 Header</header> 需改為 -->
+      <template v-slot:header>替換的 Header</template>
+      <template v-slot:footer>替換的 Footer</template>
+      <template v-slot:btn>按鈕內容</template>
+      <!-- <p slot="content">其餘的內容</p> 需改為-->
+      <template v-slot:content>其餘的內容</template> 
+
+      <!-- 以上的v-slot又可以縮寫成 # ，但建議若要使用v-slot就重頭到尾都用v-slot，若要用# -->
+      <!-- <template #header>替換的 Header</template>
+      <template #footer>替換的 Footer</template>
+      <template #btn>按鈕內容</template>
+      <template #content>其餘的內容</template>  -->
+
+    </named-slot-component>
+  </div>
+
+
+  <script type="text/x-template" id="singleSlotComponent">
+    <div class="alert alert-warning">
+      <h6>我是一個元件</h6>
+      <slot v-slot:default>如果沒有內容，則會顯示此段落。</slot>
+      <!-- 第二種方法 不寫default也可 -->
+      <!-- <slot>如果沒有內容，則會顯示此段落。</slot> -->
+    </div>
+  </script>
+
+
+   
+  <script type="text/x-template" id="namedSlotComponent">
+    <div class="card my-3">
+      <div class="card-header">
+        <slot name="header">這段是預設的文字</slot>
+      </div>
+      <div class="card-body">
+        <slot name="content">
+          <h5 class="card-title">Special title treatment</h5>
+          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+        </slot>
+        <a href="#" class="btn btn-primary">
+          <slot name="btn">spanGo somewhere</slot>
+        </a>
+      </div>
+      <div class="card-footer">
+        <slot name="footer">這是預設的 Footer</slot>
+      </div>
+    </div>
+    </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+  <script>
+      Vue.component('named-slot-component', {
+        template: '#namedSlotComponent',
+      });
+      Vue.component('single-slot-component', {
+        template: '#singleSlotComponent',
+      });
+
+      var app = new Vue({
+        el: '#app',
+        data: {}
+      });
+  </script>
+
+
+</body>
+
+</html>
