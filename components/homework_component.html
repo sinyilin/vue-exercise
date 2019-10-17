@@ -128,13 +128,19 @@
 </div>
 
 <div id="app">
-  <select name="" id="" class="form-control mb-3">
+  <select name="" id="" class="form-control mb-3" v-model="filter">
     <option value="">--- 請選擇城市 ---</option>
+    <option v-for="item in location" :value="item" :key="item">{{item}}</option>
   </select>
   <div>
     <h4>關注城市</h4>
     <div class="card-columns">
-      <div class="card status-aqi2">
+      <!-- <div v-show="stared">暫無關注城市</div> -->
+      <card :sites="item" v-for="item in stared" :key="item.SiteId">
+          <i class="fas fa-star"></i>
+          <!-- <a href="#" class="float-right" @click.prevent="addStared(sites)"><i class="fas fa-star"></i></a> -->
+      </card>
+      <!-- <div class="card status-aqi2">
         <div class="card-header">苗栗縣 - 三義
           <a href="#" class="float-right"><i class="fas fa-star"></i></a>
         </div>
@@ -146,13 +152,17 @@
           </ul>
           2018-05-20 16:00
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
   
   <hr>
   <div class="card-columns">
-    <div class="card status-aqi2">
+    <!-- Ques2: <a href="#" class="float-right" @click.prevent="addStared(sites)"><i class="far fa-star"></i></a> 不能直接放在slot裡 -->
+    <card :sites="item" v-for="item in filterSite" :key="item.SiteId" @update-stared="addStared">
+      <i class="far fa-star"></i>
+    </card>
+    <!-- <div class="card status-aqi2">
       <div class="card-header">苗栗縣 - 三義
         <a href="#" class="float-right"><i class="far fa-star"></i></a>
       </div>
@@ -164,14 +174,60 @@
         </ul>
       2018-05-20 16:00
       </div>
-    </div>
+    </div> -->
   </div>
 </div>
+
+<script type="text/x-template" id="card">
+  <!-- <div class="card-columns"> -->
+    <div class="card" :class="statusClass">
+      <div class="card-header">{{sites.County}} - {{sites.SiteName}}
+        <a href="#" class="float-right" @click.prevent="follow(sites)"><slot></slot></a>
+      </div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          <li>AQI 指數: {{sites.AQI}}</li>
+          <li>PM2.5: {{sites['PM2.5']}}</li>
+          <li>說明: {{sites.Status}}</li>
+        </ul>
+      {{sites.PublishTime}}
+      </div>
+    </div>
+  <!-- </div> -->
+
+</script>
 
 <script>
 // API 來源
 // https://opendata.epa.gov.tw/Data/Contents/AQI/
-
+Vue.component('card',{
+  template:'#card',
+  props: ["sites"],
+  computed: {
+    statusClass(){
+      switch(this.sites.Status){
+        case '普通':
+          return 'status-aqi2';
+        case '對敏感族群不健康':
+          return 'status-aqi3';   
+        case '對所有族群不健康':
+          return 'status-aqi4'; 
+        case '非常不健康':
+          return 'status-aqi5';   
+        case '危害':
+          return 'status-aqi6';                             
+        default:
+          //良好
+          return '';
+      }
+    }
+  },
+  methods: {
+    follow(val){
+      this.$emit('update-stared', val);
+    }
+  },
+});
 var app = new Vue({
   el: '#app',
   data: {
@@ -192,6 +248,33 @@ var app = new Vue({
         console.log(response)
       });
     },
+    addStared(val){
+      this.stared.push(val);
+    }
+  },
+  computed:{
+    filterSite(){
+      var filter = this.filter;
+      return this.data.filter(d => d.County.includes(this.filter));
+    }
+  },
+  created:function(){
+    const vm = this;
+      const api = 'http://opendata2.epa.gov.tw/AQI.json';
+
+      // 使用 jQuery ajax
+      $.get(api).then(function( response ) {
+        vm.data = response;
+
+        // 取列表中所有County
+        var allCounty = response.map(function(item){
+          return item.County;
+        });
+
+        //以set去除重複County，並將set轉回array
+        vm.location = Array.from(new Set(allCounty));
+        //Ques1: set() 無法使用v-for
+      });
   }
 });
 </script>
