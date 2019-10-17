@@ -129,16 +129,14 @@
 
 <div id="app">
   <select name="" id="" class="form-control mb-3" v-model="filter">
-    <option value="">--- 請選擇城市 ---</option>
+    <option value="" disabled>--- 請選擇城市 ---</option>
     <option v-for="item in location" :value="item" :key="item">{{item}}</option>
   </select>
   <div>
     <h4>關注城市</h4>
     <div class="card-columns">
       <!-- <div v-show="stared">暫無關注城市</div> -->
-      <card :sites="item" v-for="item in stared" :key="item.SiteId">
-          <i class="fas fa-star"></i>
-          <!-- <a href="#" class="float-right" @click.prevent="addStared(sites)"><i class="fas fa-star"></i></a> -->
+      <card :sites="item" :stared="stared" v-for="item in stared" :key="item.SiteId" @update-stared="editStared">
       </card>
       <!-- <div class="card status-aqi2">
         <div class="card-header">苗栗縣 - 三義
@@ -159,8 +157,7 @@
   <hr>
   <div class="card-columns">
     <!-- Ques2: <a href="#" class="float-right" @click.prevent="addStared(sites)"><i class="far fa-star"></i></a> 不能直接放在slot裡 -->
-    <card :sites="item" v-for="item in filterSite" :key="item.SiteId" @update-stared="addStared">
-      <i class="far fa-star"></i>
+    <card :sites="item" :stared="stared" v-for="item in filterSite" :key="item.SiteId" @update-stared="editStared">
     </card>
     <!-- <div class="card status-aqi2">
       <div class="card-header">苗栗縣 - 三義
@@ -179,10 +176,9 @@
 </div>
 
 <script type="text/x-template" id="card">
-  <!-- <div class="card-columns"> -->
     <div class="card" :class="statusClass">
       <div class="card-header">{{sites.County}} - {{sites.SiteName}}
-        <a href="#" class="float-right" @click.prevent="follow(sites)"><slot></slot></a>
+        <a href="#" class="float-right" @click.prevent="clickStar(sites)"><i class="fa-star" :class="[isStared ? 'fas':'far']"></i></a>
       </div>
       <div class="card-body">
         <ul class="list-unstyled">
@@ -193,16 +189,16 @@
       {{sites.PublishTime}}
       </div>
     </div>
-  <!-- </div> -->
-
 </script>
 
 <script>
 // API 來源
 // https://opendata.epa.gov.tw/Data/Contents/AQI/
+// CodePen 在讀取外部資源時要求連結必須是 HTTPS 的，可透過 heroku 提供的 CORS proxy 來解決這個問題
+// 所以採用 https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json
 Vue.component('card',{
   template:'#card',
-  props: ["sites"],
+  props: ["sites","stared"],
   computed: {
     statusClass(){
       switch(this.sites.Status){
@@ -220,10 +216,14 @@ Vue.component('card',{
           //良好
           return '';
       }
+    },
+    isStared(){
+      return this.stared.includes(this.sites) ? true : false;
     }
   },
   methods: {
-    follow(val){
+    clickStar(val){
+      console.log(val);
       this.$emit('update-stared', val);
     }
   },
@@ -240,7 +240,7 @@ var app = new Vue({
   methods: {
     getData() {
       const vm = this;
-      const api = 'http://opendata2.epa.gov.tw/AQI.json';
+      const api = 'https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json';
 
       // 使用 jQuery ajax
       $.get(api).then(function( response ) {
@@ -248,8 +248,13 @@ var app = new Vue({
         console.log(response)
       });
     },
-    addStared(val){
-      this.stared.push(val);
+    editStared(val){
+      if(!this.stared.includes(val)){
+        this.stared.push(val);
+      }else{
+        this.stared = this.stared.filter(d => d != val);
+      }
+      console.log(val);
     }
   },
   computed:{
@@ -260,7 +265,7 @@ var app = new Vue({
   },
   created:function(){
     const vm = this;
-      const api = 'http://opendata2.epa.gov.tw/AQI.json';
+      const api = 'https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json';
 
       // 使用 jQuery ajax
       $.get(api).then(function( response ) {
