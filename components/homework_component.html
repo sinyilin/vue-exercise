@@ -226,16 +226,17 @@ Vue.component('card',{
       }
     },
     isStared(){
-      let staredSiteIds = this.stared.map(el => el.SiteId);
-      return staredSiteIds.includes(this.sites.SiteId) ? true : false;
       // Question:以物件的方式比對，但有點問題
-
       // console.log(this.stared[0]);
       // console.log(this.sites);
       // console.log(JSON.stringify(this.stared[0]));
       // console.log(JSON.stringify(this.sites));
+      // console.log(JSON.stringify(this.stared[0])==JSON.stringify(this.sites));
       // console.log(this.stared.includes(this.sites) ? true : false);
       // return this.stared.includes(this.sites) ? true : false;
+    
+      let staredSiteIds = this.stared.map(el => el.SiteId);
+      return staredSiteIds.includes(this.sites.SiteId) ? true : false; 
     }
   },
   methods: {
