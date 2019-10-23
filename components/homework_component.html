@@ -142,9 +142,10 @@
   <div>
     <h4>關注城市</h4>
     <div class="card-columns">
-      <!-- <div v-show="stared">暫無關注城市</div> -->
+      <div v-show="isNoStared">目前暫無關注城市</div>     
       <card :sites="item" :stared="stared" v-for="item in stared" :key="item.SiteId" @update-stared="editStared">
       </card>
+      
       <!-- <div class="card status-aqi2">
         <div class="card-header">苗栗縣 - 三義
           <a href="#" class="float-right"><i class="fas fa-star"></i></a>
@@ -225,12 +226,20 @@ Vue.component('card',{
       }
     },
     isStared(){
-      return this.stared.includes(this.sites) ? true : false;
+      let staredSiteIds = this.stared.map(el => el.SiteId);
+      return staredSiteIds.includes(this.sites.SiteId) ? true : false;
+      // Question:以物件的方式比對，但有點問題
+
+      // console.log(this.stared[0]);
+      // console.log(this.sites);
+      // console.log(JSON.stringify(this.stared[0]));
+      // console.log(JSON.stringify(this.sites));
+      // console.log(this.stared.includes(this.sites) ? true : false);
+      // return this.stared.includes(this.sites) ? true : false;
     }
   },
   methods: {
     clickStar(val){
-      console.log(val);
       this.$emit('update-stared', val);
     }
   },
@@ -245,48 +254,57 @@ var app = new Vue({
   },
   // 請在此撰寫 JavaScript
   methods: {
-    getData() {
-      const vm = this;
-      const api = 'https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json';
+    // getData() {
+    //   const vm = this;
+    //   const api = 'https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json';
 
-      // 使用 jQuery ajax
-      $.get(api).then(function( response ) {
-        vm.data = response;
-        console.log(response)
-      });
-    },
+    //   // 使用 jQuery ajax
+    //   $.get(api).then(function( response ) {
+    //     vm.data = response;
+    //     console.log(response);
+    //   });
+    // },
     editStared(val){
       if(!this.stared.includes(val)){
         this.stared.push(val);
+        localStorage.setItem("follow", JSON.stringify(this.stared));
       }else{
         this.stared = this.stared.filter(d => d != val);
+        localStorage.setItem("follow", JSON.stringify(this.stared));
       }
-      console.log(val);
     }
   },
   computed:{
     filterSite(){
       var filter = this.filter;
       return this.data.filter(d => d.County.includes(this.filter));
+    },
+    isNoStared(){
+      return this.stared.length == 0;
     }
   },
   created:function(){
     const vm = this;
-      const api = 'https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json';
+    const api = 'https://cors-anywhere.herokuapp.com/http://opendata2.epa.gov.tw/AQI.json';
 
-      // 使用 jQuery ajax
-      $.get(api).then(function( response ) {
-        vm.data = response;
+    //取得localStorage資料 
+    this.stared =  JSON.parse(localStorage.getItem('follow'))|| []; 
+    console.log(this.stared);
 
-        // 取列表中所有County
-        var allCounty = response.map(function(item){
-          return item.County;
-        });
+    // 使用 jQuery ajax
+    $.get(api).then(function( response ) {
+      //將取得的data塞回 data
+      vm.data = response;
 
-        //以set去除重複County，並將set轉回array
-        vm.location = Array.from(new Set(allCounty));
-        //Ques1: set() 無法使用v-for
+      // 取列表中所有County
+      var allCounty = response.map(function(item){
+        return item.County;
       });
+
+      //以set去除重複County，並將set轉回array
+      //set() 無法使用v-for
+      vm.location = Array.from(new Set(allCounty));
+    });
   }
 });
 </script>
